@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>연구실 홈페이지</title>
+  <style>
+    :root{
+      --bg:#ffffff; --fg:#1f2937; --muted:#6b7280; --brand:#2563eb; --ring:#93c5fd;
+      --card:#ffffff; --border:#e5e7eb; --chip:#f3f4f6;
+    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#0b1020; --fg:#e5e7eb; --muted:#9aa0a6; --brand:#60a5fa; --ring:#2563eb;
+        --card:#0f162e; --border:#1f2937; --chip:#1f2937;
+      }
+    }
+    .dark{
+      --bg:#0b1020; --fg:#e5e7eb; --muted:#9aa0a6; --brand:#60a5fa; --ring:#2563eb;
+      --card:#0f162e; --border:#1f2937; --chip:#1f2937;
+    }
+    *{ box-sizing:border-box }
+    body{ margin:0; font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background:var(--bg); color:var(--fg); }
+    a{ color:inherit }
+
+    /* Topbar */
+    .top{
+      position:sticky; top:0; z-index:50; backdrop-filter:saturate(180%) blur(8px);
+      background: rgba(255,255,255,0.85); /* 폴백 */
+      background: color-mix(in srgb, var(--bg) 85%, transparent);
+      border-bottom:1px solid var(--border);
+    }
+    .nav{ max-width:1080px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:12px 16px; }
+    .brand{ display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:-.2px }
+    .brand .logo{ width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,var(--brand),#7c3aed); box-shadow:0 2px 6px rgba(0,0,0,.25) }
+    .navlinks{ display:flex; gap:18px; align-items:center }
+    .btn{ padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--fg); cursor:pointer }
+
+    /* Sections */
+    section{ scroll-margin-top:80px; }
+    .section{ max-width:1080px; margin:0 auto; padding:32px 16px; }
+    .section h2{ margin:0 0 12px; font-size:clamp(22px,3.2vw,28px) }
+    .sub{ color:var(--muted); margin-top:0 }
+
+    /* Professor Card */
+    .prof{ display:grid; grid-template-columns: 140px 1fr; gap:16px; background:var(--card);
+      border:1px solid var(--border); border-radius:16px; padding:16px; }
+    .avatar-wrap{ display:grid; gap:10px; justify-items:center }
+    .avatar{ width:140px; height:140px; border-radius:12px; border:1px solid var(--border); object-fit:cover; background:#ddd; }
+    .small{ font-size:12px; color:var(--muted) }
+    .editable{ outline:none; border-radius:8px }
+    .editable:focus{ box-shadow:0 0 0 3px var(--ring) }
+    .pill{ display:inline-block; padding:4px 8px; border-radius:999px; background:color-mix(in srgb, var(--brand) 12%, transparent);
+      border:1px solid var(--border); font-size:12px; color:var(--fg) }
+    .deg{ display:grid; gap:6px; font-size:14px; margin-top:8px }
+    .row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap }
+    .muted{ color:var(--muted) }
+
+    /* Teaching */
+    .grid{ display:grid; gap:14px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .course{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px; display:grid; gap:10px }
+    .course h3{ margin:0 0 4px }
+    .hint{ font-size:12px; color:var(--muted) }
+    .mini-form{ display:flex; gap:6px }
+    .mini-form input{ flex:1; border:1px solid var(--border); border-radius:8px; padding:8px 10px; background:transparent; color:var(--fg) }
+    .a-btn{ display:inline-block; padding:8px 12px; border:1px solid var(--border); border-radius:10px; text-decoration:none; background:var(--card); }
+
+    footer{ border-top:1px solid var(--border); color:var(--muted); font-size:13px }
+    .foot{ max-width:1080px; margin:0 auto; padding:18px 16px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <nav class="nav">
+      <div class="brand"><div class="logo" aria-hidden="true"></div><a href="#home" id="labName" class="editable" contenteditable="true">□□□ 연구실</a></div>
+      <div class="navlinks">
+        <a href="#people">교수 소개</a>
+        <a href="#publications">Inspire HEP</a>
+        <a href="#teaching">수업자료</a>
+        <button class="btn" id="toggleTheme">🌗 테마</button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Hero -->
+  <section class="section" id="home">
+    <h1 id="heroTitle" class="editable" contenteditable="true">□□□ 연구실 (Lab for □□□)</h1>
+    <p id="heroDesc" class="sub editable" contenteditable="true">우리 연구실은 이론/실험 물리 분야의 교육과 연구를 수행합니다.</p>
+  </section>
+
+  <!-- Professor Only -->
+  <section class="section" id="people">
+    <h2>교수 소개</h2>
+    <p class="sub">텍스트를 클릭해 수정하세요. 사진은 “사진 변경”으로 로컬 파일 업로드(자동 저장).</p>
+    <div class="prof">
+      <div class="avatar-wrap">
+        <img id="profPhoto" class="avatar" alt="교수 사진" src="">
+        <input id="photoFile" type="file" accept="image/*" hidden>
+        <button class="btn" id="changePhoto">사진 변경</button>
+        <button class="btn" id="removePhoto" style="background:var(--chip);">사진 제거</button>
+        <div class="small">권장: 정사각형 JPG/PNG</div>
+      </div>
+      <div>
+        <div class="row">
+          <strong id="profName" class="editable" contenteditable="true">홍길동</strong>
+          <span class="pill">교수</span>
+        </div>
+        <div class="editable muted" id="profAffil" contenteditable="true" style="margin-top:4px;">□□대학교 물리학과</div>
+
+        <div class="deg">
+          <div><strong>B.S.</strong> · <span id="degB" class="editable" contenteditable="true">○○대학교</span></div>
+          <div><strong>M.S.</strong> · <span id="degM" class="editable" contenteditable="true">○○대학교</span></div>
+          <div><strong>Ph.D.</strong> · <span id="degP" class="editable" contenteditable="true">○○대학교</span></div>
+          <div><strong>Postdoc</strong> · <span id="degPostdoc" class="editable" contenteditable="true">○○ 연구소/대학교</span></div>
+        </div>
+
+        <div style="margin-top:10px; font-size:14px">
+          <span class="muted">이메일</span> · <span id="profEmail" class="editable" contenteditable="true">email@example.edu</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Publications -->
+  <section class="section" id="publications">
+    <h2>📄 <a href="https://inspirehep.net/authors/1013647?ui-citation-summary=true" target="_blank" rel="noopener">Inspire HEP</a></h2>
+    <p class="sub">INSPIRE HEP</p>
+  </section>
+
+  <!-- Teaching (download-only via Drive folder links) -->
+  <section class="section" id="teaching">
+    <h2>수업자료</h2>
+    <p class="sub">과목별 Google Drive 폴더 링크를 저장하면, 학생은 ‘자료 폴더 열기’ 버튼으로 접근하여 다운로드할 수 있습니다.</p>
+    <div class="grid" id="courseGrid"></div>
+  </section>
+
+  <footer>
+    <div class="foot">
+      <div>© <span id="year"></span> <span id="footerLab">□□□ 연구실</span></div>
+      <div style="display:flex; gap:10px">
+        <a href="#home">맨 위로</a>
+      </div>
+    </div>
+  </footer>
+
+<script>
+  // --- Safe localStorage wrapper (works even in Safari Private) ---
+  const storage = (() => {
+    try {
+      const t = '__test__';
+      window.localStorage.setItem(t, '1');
+      window.localStorage.removeItem(t);
+      return window.localStorage;
+    } catch (e) {
+      console.warn('localStorage unavailable, falling back to no-op store', e);
+      return { getItem: () => null, setItem: () => {}, removeItem: () => {} };
+    }
+  })();
+
+  // ===== Theme =====
+  const rootEl = document.documentElement;
+  const toggleThemeBtn = document.getElementById('toggleTheme');
+  const savedTheme = storage.getItem('lab.theme');
+  if(savedTheme==='dark') rootEl.classList.add('dark');
+  toggleThemeBtn.addEventListener('click', ()=>{
+    rootEl.classList.toggle('dark');
+    storage.setItem('lab.theme', rootEl.classList.contains('dark')?'dark':'light');
+  });
+
+  // ===== Helpers: autoPersist for contenteditable text =====
+  function autoPersist(el, key){
+    const saved = storage.getItem(key);
+    if(saved!==null) el.textContent = saved;
+    let t;
+    const save = ()=> storage.setItem(key, el.textContent.trim());
+    el.addEventListener('blur', save);
+    el.addEventListener('input', ()=>{ clearTimeout(t); t=setTimeout(save, 300); });
+  }
+
+  // Hero & Lab name
+  autoPersist(document.getElementById('labName'), 'lab.name');
+  autoPersist(document.getElementById('heroTitle'), 'lab.hero.title');
+  autoPersist(document.getElementById('heroDesc'), 'lab.hero.desc');
+
+  // Professor text fields
+  const profName = document.getElementById('profName');
+  const profAffil = document.getElementById('profAffil');
+  const profEmail = document.getElementById('profEmail');
+  const degB = document.getElementById('degB');
+  const degM = document.getElementById('degM');
+  const degP = document.getElementById('degP');
+  const degPostdoc = document.getElementById('degPostdoc');
+
+  autoPersist(profName, 'lab.prof.name');
+  autoPersist(profAffil, 'lab.prof.affil');
+  autoPersist(profEmail, 'lab.prof.email');
+  autoPersist(degB, 'lab.prof.degB');
+  autoPersist(degM, 'lab.prof.degM');
+  autoPersist(degP, 'lab.prof.degP');
+  autoPersist(degPostdoc, 'lab.prof.postdoc');
+
+  // Mirror lab name to footer
+  function syncFooter(){
+    const name = (storage.getItem('lab.name')||'□□□ 연구실').replace(/<[^>]*>/g,'');
+    document.getElementById('footerLab').textContent = name;
+  }
+  window.addEventListener('storage', syncFooter);
+  syncFooter();
+
+  // ===== Professor photo (storage dataURL) =====
+  const profPhoto = document.getElementById('profPhoto');
+  const photoKey = 'lab.prof.photo';
+  const savedPhoto = storage.getItem(photoKey);
+  if(savedPhoto){ profPhoto.src = savedPhoto; } else { profPhoto.src = ''; }
+
+  document.getElementById('changePhoto').addEventListener('click', ()=>{
+    document.getElementById('photoFile').click();
+  });
+  document.getElementById('photoFile').addEventListener('change', (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=> {
+      storage.setItem(photoKey, reader.result);
+      profPhoto.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('removePhoto').addEventListener('click', ()=>{
+    storage.removeItem(photoKey);
+    profPhoto.src = '';
+  });
+
+  // ===== Teaching (courses with only folder link) =====
+  const defaultCourses = [
+    { id:'Mech',       title:'역학',             year:'2025-1', folder:'' },
+    { id:'QM',         title:'양자역학',         year:'2025-1', folder:'' },
+    { id:'EM',         title:'전자기학',         year:'2025-1', folder:'' },
+    { id:'MathPhys',   title:'수리물리',         year:'2025-2', folder:'' },
+    { id:'StatPhys',   title:'열및통계물리',     year:'2025-2', folder:'' },
+    { id:'IntroPhys',  title:'기초물리',         year:'2025-2', folder:'' },
+    { id:'ModernPhys', title:'현대물리',         year:'2025-2', folder:'' },
+  ];
+  let courses = JSON.parse(storage.getItem('lab.courses')||'null') || defaultCourses;
+  const courseGrid = document.getElementById('courseGrid');
+
+  function saveCourses(){ storage.setItem('lab.courses', JSON.stringify(courses)); }
+
+  function renderCourses(){
+    courseGrid.innerHTML = '';
+    courses.forEach((c,ci)=>{
+      const wrap = document.createElement('div');
+      wrap.className = 'course';
+      wrap.innerHTML = `
+        <h3 contenteditable="true" data-ci="${ci}" class="editable editable-title">
+          ${c.title} <span style="font-weight:400; color:var(--muted); font-size:14px">(${c.year})</span>
+        </h3>
+        <div>
+          ${c.folder
+            ? `<a class="a-btn" href="${c.folder}" target="_blank" rel="noopener">📁 자료 폴더 열기</a>`
+            : `<span class="hint">아래에 Google Drive 폴더 링크를 저장하세요.</span>`}
+        </div>
+        <div class="mini-form" data-ci="${ci}">
+          <input name="folder" placeholder="Google Drive 폴더 링크 (읽기 전용 권장)" value="${c.folder||''}" />
+          <button class="btn" data-kind="saveFolder">저장</button>
+        </div>
+      `;
+      courseGrid.appendChild(wrap);
+
+      // Save folder link
+      wrap.querySelector('[data-kind="saveFolder"]').addEventListener('click', ()=>{
+        const box = wrap.querySelector('.mini-form');
+        const idx = +box.dataset.ci;
+        courses[idx].folder = box.querySelector('input[name="folder"]').value.trim();
+        saveCourses(); renderCourses();
+      });
+    });
+
+    // Inline edit course title/year
+    document.querySelectorAll('.editable-title').forEach(h=>{
+      h.addEventListener('blur', ()=>{
+        const idx = +h.dataset.ci; const text = h.textContent.trim();
+        const m = text.match(/^(.*?)(\(([^)]*)\))?$/); // title (year)
+        courses[idx].title = (m && m[1].trim()) || text;
+        if(m && m[3]) courses[idx].year = m[3].trim();
+        saveCourses();
+      });
+    });
+  }
+  renderCourses();
+
+  // Footer year
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
