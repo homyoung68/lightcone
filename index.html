@@ -7,6 +7,11 @@
   <meta http-equiv="Expires" content="0" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>연구실 홈페이지</title>
+
+  <!-- SEO -->
+  <meta name="description" content="상대론적 쿼크 모형 기반 강입자 물리 현상론 연구와 물리 교육의 실제 적용을 중심으로 교육·연구 활동을 수행하는 연구실." />
+  <meta name="author" content="홍길동" />
+
   <style>
     :root{ --bg:#ffffff; --fg:#111827; --muted:#6b7280; --card:#ffffff; --border:#e5e7eb; --brand:#2563eb; --ring:#93c5fd; }
     @media (prefers-color-scheme: dark){
@@ -37,21 +42,21 @@
     .foot{ max-width:960px; margin:0 auto; padding:16px }
     .badge{ position:fixed; right:12px; bottom:12px; background:#10b981; color:#fff; padding:6px 10px; border-radius:8px; font-size:12px; z-index:9999; box-shadow:0 2px 6px rgba(0,0,0,.2)}
     .admin-only{ display:none } /* 기본은 숨김 */
-    /* ✅ EDIT/ADMIN 모드일 때 admin-only 강제 노출 */
+    /* EDIT/ADMIN 모드일 때 admin-only 강제 노출 */
     :root.edit .admin-only,
     :root.admin .admin-only { display: inline-block !important; }
   </style>
 
-  <!-- ✅ 아주 이른 시점에 모드 태깅: ?edit=1 또는 로컬/localhost면 <html>에 클래스 부여 -->
+  <!-- 아주 이른 시점에 모드 태깅: ?edit=1 또는 로컬/localhost면 <html>에 클래스 부여 -->
   <script>
     (function(){
       try{
         var u = new URL(window.location.href);
         if (u.searchParams.get('edit') === '1' || location.hash.includes('edit')) {
-          document.documentElement.classList.add('edit');   // EDIT 모드
+          document.documentElement.classList.add('edit');   // EDIT
         }
         if (location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/i.test(location.hostname)) {
-          document.documentElement.classList.add('admin');  // ADMIN 모드
+          document.documentElement.classList.add('admin');  // ADMIN
         }
       }catch(e){}
     })();
@@ -78,7 +83,7 @@
     <section id="home">
       <h1 id="heroTitle" class="editable" contenteditable="true">□□□ 연구실 (Lab for □□□)</h1>
       <p id="heroDesc" class="sub editable" contenteditable="true">
-        본 연구실은 상대론적 쿼크 모형을 활용한 강입자 물리 현상론 연구와 물리 교육의 현장 적용에 관한 연구를 수행하고 있습니다.
+        본 연구실은 상대론적 쿼크 모형에 기반한 강입자 물리 현상론 연구와 물리 교육의 실제 적용을 중심으로 교육·연구 활동을 수행하고 있습니다.
       </p>
     </section>
 
@@ -86,12 +91,13 @@
       <h2>교수 소개</h2>
       <div class="card" style="display:grid; grid-template-columns:140px 1fr; gap:16px">
         <div style="display:grid; gap:10px; justify-items:center">
-          <!-- 모두에게 동일한 기본 사진을 쓰려면 src="professor.jpg"로 교체 -->
+          <!-- 기본 사진(모두에게 동일) → 저장소에 professor.jpg 업로드 권장 -->
           <img id="profPhoto" class="avatar" alt="교수 사진" src="">
           <input id="photoFile" type="file" accept="image/*" hidden>
-          <!-- ✅ EDIT/ADMIN 모드에서 노출됨 -->
+          <!-- EDIT/ADMIN 모드에서만 노출 -->
           <button id="changePhoto" class="btn admin-only">사진 변경</button>
           <button id="removePhoto" class="btn admin-only">사진 제거</button>
+          <div class="muted" style="font-size:12px">권장: 정사각형 JPG/PNG</div>
         </div>
         <div>
           <div class="row">
@@ -121,7 +127,7 @@
       </p>
     </section>
 
-    <!-- ✅ 강의자료: 5개 과목 개별 '직접 다운로드' 링크 -->
+    <!-- 강의자료: 5개 과목 개별 '직접 다운로드' 링크 -->
     <section id="teaching">
       <h2>강의자료</h2>
       <ul>
@@ -131,6 +137,7 @@
         <li><a href="https://drive.google.com/uc?export=download&id=1tyRCPN4GCjeoWjIdrCiyaPB9SSvWxJmd" target="_blank" rel="noopener">📥 통계물리학</a></li>
         <li><a href="https://drive.google.com/uc?export=download&id=1E52i8zGZpRFIFNu0sJ6AJub2Dwunk0Ou" target="_blank" rel="noopener">📥 수리물리학</a></li>
       </ul>
+      <p class="muted" style="font-size:12px">* 각 링크는 바로 파일을 내려받는 형식입니다(Drive UI 미노출).</p>
     </section>
   </main>
 
@@ -141,7 +148,7 @@
 <script>
   // ===== 배포 캐시 초기화용 스키마(버전 올리면 로컬 편집값 초기화) =====
   (function schemaReset(){
-    const SCHEMA='lab.schema.v12';
+    const SCHEMA='lab.schema.v13';
     try{
       const storage = window.localStorage;
       if(storage.getItem('lab.__schema_version')!==SCHEMA){
@@ -179,9 +186,18 @@
   function syncFooter(){ const name=(storage.getItem('lab.name')||'□□□ 연구실').replace(/<[^>]*>/g,''); document.getElementById('footerLab').textContent=name; }
   window.addEventListener('storage',syncFooter); syncFooter();
 
-  // ===== 사진(브라우저 저장) =====
-  const profPhoto=document.getElementById('profPhoto'); const photoKey='lab.prof.photo';
-  const savedPhoto=storage.getItem(photoKey); if(savedPhoto) profPhoto.src=savedPhoto;
+  // ===== 사진(기본→professor.jpg, 편집모드 업로드→로컬저장 덮어쓰기) =====
+  const profPhoto=document.getElementById('profPhoto');
+  const photoKey='lab.prof.photo';
+  const DEFAULT_PHOTO='professor.jpg'; // 저장소 루트 또는 assets/img/ 에 업로드 권장
+  (function initPhoto(){
+    try{
+      const saved=storage.getItem(photoKey);
+      if(saved){ profPhoto.src=saved; }
+      else { profPhoto.src=DEFAULT_PHOTO; } // 기본 사진
+    }catch(e){ profPhoto.src=DEFAULT_PHOTO; }
+  })();
+
   const changeBtn=document.getElementById('changePhoto'), removeBtn=document.getElementById('removePhoto');
   if(changeBtn) changeBtn.addEventListener('click',()=>document.getElementById('photoFile').click());
   const photoInput=document.getElementById('photoFile');
@@ -189,17 +205,18 @@
     const f=e.target.files&&e.target.files[0]; if(!f) return;
     const r=new FileReader(); r.onload=()=>{ storage.setItem(photoKey,r.result); profPhoto.src=r.result; }; r.readAsDataURL(f);
   });
-  if(removeBtn) removeBtn.addEventListener('click',()=>{ storage.removeItem(photoKey); profPhoto.src=''; });
+  if(removeBtn) removeBtn.addEventListener('click',()=>{ storage.removeItem(photoKey); profPhoto.src=DEFAULT_PHOTO; });
 
-  // ===== DOMContentLoaded 시점에 contenteditable 보장 (EDIT/ADMIN) =====
+  // ===== DOMContentLoaded: contenteditable 보장 및 배지 표시 =====
   document.addEventListener('DOMContentLoaded', function(){
     var isEdit  = document.documentElement.classList.contains('edit');
     var isAdmin = document.documentElement.classList.contains('admin');
+
     document.querySelectorAll('.editable').forEach(function(el){
       if (isEdit || isAdmin) el.setAttribute('contenteditable','true');
       else el.removeAttribute('contenteditable');
     });
-    // 배지
+
     var badgeText = isAdmin ? '✎ ADMIN MODE' : (isEdit ? '✎ EDIT MODE' : '');
     if (badgeText){
       var b=document.createElement('div'); b.textContent=badgeText;
