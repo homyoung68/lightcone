@@ -37,7 +37,25 @@
     .foot{ max-width:960px; margin:0 auto; padding:16px }
     .badge{ position:fixed; right:12px; bottom:12px; background:#10b981; color:#fff; padding:6px 10px; border-radius:8px; font-size:12px; z-index:9999; box-shadow:0 2px 6px rgba(0,0,0,.2)}
     .admin-only{ display:none } /* VIEW 모드에서 숨김. EDIT/ADMIN에서만 표시 */
+/* EDIT/ADMIN 모드일 때 admin-only 강제 노출 */
+:root.edit .admin-only,
+:root.admin .admin-only { display: inline-block !important; }
   </style>
+<script>
+/* URL 파라미터/호스트를 보고 즉시 <html>에 모드 클래스를 부여 */
+(function(){
+  try{
+    var u = new URL(window.location.href);
+    if (u.searchParams.get('edit') === '1' || location.hash.includes('edit')) {
+      document.documentElement.classList.add('edit');   // EDIT 모드
+    }
+    if (location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/i.test(location.hostname)) {
+      document.documentElement.classList.add('admin');  // ADMIN 모드
+    }
+  }catch(e){}
+})();
+</script>
+
 </head>
 <body>
   <header>
@@ -74,7 +92,6 @@
           <!-- 사진 편집: EDIT/ADMIN 모드에서 표시 -->
           <button id="changePhoto" class="btn admin-only">사진 변경</button>
           <button id="removePhoto" class="btn admin-only">사진 제거</button>
-          <div class="muted" style="font-size:12px">권장: 정사각형 JPG/PNG</div>
         </div>
         <div>
           <div class="row">
@@ -218,6 +235,17 @@
     Object.keys(localStorage||{}).filter(k=>k.startsWith('lab.')).forEach(k=>localStorage.removeItem(k));
     location.reload();
   });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var isEdit  = document.documentElement.classList.contains('edit');
+  var isAdmin = document.documentElement.classList.contains('admin');
+
+  document.querySelectorAll('.editable').forEach(function(el){
+    if (isEdit || isAdmin) el.setAttribute('contenteditable','true');
+    else el.removeAttribute('contenteditable');
+  });
+});
 </script>
 </body>
 </html>
