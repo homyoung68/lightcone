@@ -183,7 +183,7 @@
    .forEach(([k,id])=>{ const el=document.getElementById(id); if(el) autoPersist(el,k); });
 
   // ===== 푸터 이름 동기화 =====
-  function syncFooter(){ const name=(storage.getItem('lab.name')||'□□□ 연구실').replace(/<[^>]*>/g,''); document.getElementById('footerLab').textContent=name; }
+  function syncFooter(){ const name=(storage.getItem('lab.name')||'입자/핵물리 이론 연구실').replace(/<[^>]*>/g,''); document.getElementById('footerLab').textContent=name; }
   window.addEventListener('storage',syncFooter); syncFooter();
 
   // ===== 사진(기본→professor.jpg, 편집모드 업로드→로컬저장 덮어쓰기) =====
