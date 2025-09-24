@@ -8,9 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>연구실 홈페이지</title>
   <style>
-    :root{
-      --bg:#ffffff; --fg:#111827; --muted:#6b7280; --card:#ffffff; --border:#e5e7eb; --brand:#2563eb; --ring:#93c5fd;
-    }
+    :root{ --bg:#ffffff; --fg:#111827; --muted:#6b7280; --card:#ffffff; --border:#e5e7eb; --brand:#2563eb; --ring:#93c5fd; }
     @media (prefers-color-scheme: dark){
       :root{ --bg:#0b1020; --fg:#e5e7eb; --muted:#9aa0a6; --card:#0f162e; --border:#1f2937; --brand:#60a5fa; --ring:#2563eb; }
     }
@@ -29,19 +27,16 @@
     h2{ margin:0 0 10px; font-size:22px }
     .sub{ color:var(--muted); margin:4px 0 16px }
     .card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px }
-    .grid{ display:grid; gap:14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) }
     .row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap }
     .pill{ display:inline-block; padding:4px 8px; border:1px solid var(--border); border-radius:999px; font-size:12px; color:var(--muted) }
     .editable{ outline:none; border-radius:8px }
     .editable:focus{ box-shadow:0 0 0 3px var(--ring) }
     .avatar{ width:140px; height:140px; border-radius:12px; border:1px solid var(--border); object-fit:cover; background:#ddd }
     .muted{ color:var(--muted) }
-    .a-btn{ display:inline-block; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:var(--card) }
-    .mini{ font-size:12px; color:var(--muted) }
     footer{ border-top:1px solid var(--border); margin-top:24px; color:var(--muted) }
     .foot{ max-width:960px; margin:0 auto; padding:16px }
     .badge{ position:fixed; right:12px; bottom:12px; background:#10b981; color:#fff; padding:6px 10px; border-radius:8px; font-size:12px; z-index:9999; box-shadow:0 2px 6px rgba(0,0,0,.2)}
-    .admin-only{ display:none } /* VIEW/EDIT 모드에서 숨김. ADMIN에서만 보임 */
+    .admin-only{ display:none } /* VIEW 모드에서 숨김. EDIT/ADMIN에서 필요 시 표시 */
   </style>
 </head>
 <body>
@@ -54,7 +49,7 @@
       <div class="links">
         <a href="#people">교수 소개</a>
         <a href="#publications">연구</a>
-        <a href="#teaching">수업자료</a>
+        <a href="#teaching">강의자료</a>
         <button id="toggleTheme" class="btn">🌗 테마</button>
         <button id="resetAll" class="btn admin-only">♻️ 초기화</button>
       </div>
@@ -67,7 +62,6 @@
       <p id="heroDesc" class="sub editable" contenteditable="true">
         본 연구실은 상대론적 쿼크 모형을 활용한 강입자 물리 현상론 연구와 물리 교육의 현장 적용에 관한 연구를 수행하고 있습니다.
       </p>
-      <p class="mini">* 공개 페이지에서 <code>?edit=1</code>로 접속하면 이 텍스트만 임시 편집할 수 있습니다(브라우저에만 저장).</p>
     </section>
 
     <section id="people">
@@ -76,9 +70,10 @@
         <div style="display:grid; gap:10px; justify-items:center">
           <img id="profPhoto" class="avatar" alt="교수 사진" src="">
           <input id="photoFile" type="file" accept="image/*" hidden>
+          <!-- 사진 편집: EDIT/ADMIN 모드에서 표시 -->
           <button id="changePhoto" class="btn admin-only">사진 변경</button>
           <button id="removePhoto" class="btn admin-only">사진 제거</button>
-          <div class="mini">권장: 정사각형 JPG/PNG</div>
+          <div class="muted" style="font-size:12px">권장: 정사각형 JPG/PNG</div>
         </div>
         <div>
           <div class="row">
@@ -108,20 +103,15 @@
       </p>
     </section>
 
+    <!-- 강의자료: 단일 링크로 단순화 -->
     <section id="teaching">
-      <h2>수업자료</h2>
-      <p class="sub">학생에게는 **직접 다운로드 버튼만** 보입니다. (Drive 폴더 UI 노출 없음)</p>
-
-      <!-- 관리자 전용: 다운로드 항목 편집 폼 -->
-      <div class="card admin-only" style="margin-bottom:12px">
-        <strong>관리자: 다운로드 항목 편집</strong>
-        <p class="mini">Drive 파일 주소의 <code>/d/FILE_ID/</code> 중 <code>FILE_ID</code>만 입력하세요.</p>
-        <div id="adminEditor" style="display:grid; gap:12px"></div>
-        <button id="addItem" class="btn" style="margin-top:8px">+ 항목 추가</button>
-      </div>
-
-      <!-- 공개: 과목별 다운로드 목록 -->
-      <div id="downloadList" class="grid"></div>
+      <h2>강의자료</h2>
+      <p class="sub">
+        <a id="driveLink" href="https://drive.google.com/drive/folders/18Y-_ALYRli2JYrDk8Q3bt3M4UiuGaB46" target="_blank" rel="noopener">
+          여기 클릭
+        </a>
+      </p>
+      <p class="muted" style="font-size:12px">* 구글 드라이브에서 이 폴더만 공개(Viewer)로 설정하세요. 상위/다른 폴더는 공유하지 마세요.</p>
     </section>
   </main>
 
@@ -135,7 +125,7 @@
 
   // ===== Schema reset (bump to clear old edits) =====
   (function schemaReset(){
-    const SCHEMA='lab.schema.v7';   // 새 배포 시 숫자 올리면 이전 저장값 자동 초기화
+    const SCHEMA='lab.schema.v8';   // 새 배포 시 숫자 올리면 이전 저장값 자동 초기화
     const KEY='lab.__schema_version';
     try{
       const cur=storage.getItem(KEY);
@@ -184,84 +174,6 @@
   });
   if(removeBtn) removeBtn.addEventListener('click',()=>{ storage.removeItem(photoKey); profPhoto.src=''; });
 
-  // ===== Downloads (direct links; no Drive UI) =====
-  // 항목 구조: { course:'역학'|'전자기'|'양자', title:'파일명', fileId:'FILE_ID' }
-  let items = JSON.parse(storage.getItem('lab.downloads')||'null') || [
-    { course:'역학',   title:'예시) 1주차 강의노트', fileId:'' },
-    { course:'전자기', title:'예시) 1주차 강의노트', fileId:'' },
-    { course:'양자',   title:'예시) 1주차 강의노트', fileId:'' },
-  ];
-  const DL = id => `https://drive.google.com/uc?export=download&id=${id}`;
-
-  const adminEditor = document.getElementById('adminEditor');
-  const downloadList = document.getElementById('downloadList');
-
-  function renderAdmin(){
-    adminEditor.innerHTML = '';
-    items.forEach((it, idx)=>{
-      const row=document.createElement('div');
-      row.style.display='grid';
-      row.style.gap='6px';
-      row.innerHTML = `
-        <div class="row" style="justify-content:space-between">
-          <strong>항목 ${idx+1}</strong>
-          <button class="btn" data-del="${idx}">삭제</button>
-        </div>
-        <input data-idx="${idx}" data-k="course" placeholder="과목 (예: 역학/전자기/양자)" value="${it.course||''}" style="padding:8px; border:1px solid var(--border); border-radius:8px">
-        <input data-idx="${idx}" data-k="title"  placeholder="파일 제목 (예: 1주차 강의노트)" value="${it.title||''}" style="padding:8px; border:1px solid var(--border); border-radius:8px">
-        <input data-idx="${idx}" data-k="fileId" placeholder="FILE_ID" value="${it.fileId||''}" style="padding:8px; border:1px solid var(--border); border-radius:8px">
-        <div class="mini">최종 링크: ${it.fileId ? DL(it.fileId) : '(FILE_ID 입력 필요)'}</div>
-        <hr style="border:none; border-top:1px solid var(--border); margin:8px 0">
-      `;
-      adminEditor.appendChild(row);
-    });
-    adminEditor.querySelectorAll('input').forEach(inp=>{
-      inp.addEventListener('input', ()=>{
-        const i=+inp.dataset.idx, k=inp.dataset.k; items[i][k]=inp.value.trim();
-        storage.setItem('lab.downloads', JSON.stringify(items));
-        renderPublic();
-      });
-    });
-    adminEditor.querySelectorAll('button[data-del]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const i=+btn.dataset.del; items.splice(i,1);
-        storage.setItem('lab.downloads', JSON.stringify(items));
-        renderAdmin(); renderPublic();
-      });
-    });
-  }
-
-  function renderPublic(){
-    const courses = ['역학','전자기','양자'];
-    downloadList.innerHTML='';
-    courses.forEach(course=>{
-      const group = items.filter(it => it.course===course && it.fileId);
-      const card = document.createElement('div'); card.className='card';
-      card.innerHTML = `<h3>${course}</h3>` + (group.length
-        ? group.map(it=>`<p><a class="a-btn" href="${DL(it.fileId)}" target="_blank" rel="noopener">📥 ${it.title}</a></p>`).join('')
-        : `<p class="mini">아직 공개된 자료가 없습니다.</p>`);
-      downloadList.appendChild(card);
-    });
-  }
-
-  const addItemBtn=document.getElementById('addItem');
-  if(addItemBtn) addItemBtn.addEventListener('click', ()=>{
-    items.push({course:'', title:'', fileId:''});
-    storage.setItem('lab.downloads', JSON.stringify(items));
-    renderAdmin(); renderPublic();
-  });
-
-  // ===== Reset all (admin only) =====
-  const resetBtn=document.getElementById('resetAll');
-  if(resetBtn) resetBtn.addEventListener('click',()=>{
-    if(!confirm('모든 저장된 편집 내용을 초기화할까요?')) return;
-    Object.keys(localStorage||{}).filter(k=>k.startsWith('lab.')).forEach(k=>storage.removeItem(k));
-    location.reload();
-  });
-
-  // year
-  document.getElementById('year').textContent=new Date().getFullYear();
-
   // ===== Mode gating: VIEW / EDIT (?edit=1) / ADMIN (file://, localhost) =====
   (function gateModes(){
     const isLocalHost = /^(localhost|127\.0\.0\.1)$/i.test(location.hostname);
@@ -269,17 +181,20 @@
     const url         = new URL(location.href);
     const editFlag    = url.searchParams.has('edit') || location.hash.includes('edit');
 
+    // TEXT 편집 on/off
     function setTextEditable(on){
       document.querySelectorAll('.editable').forEach(el=>{
         if(on) el.setAttribute('contenteditable','true');
         else   el.removeAttribute('contenteditable');
       });
     }
-    function setAdminUI(on){
+    // 사진 버튼/초기화 버튼 표시 on/off
+    function setEditUI(on){
       document.querySelectorAll('.admin-only').forEach(el=>{
         el.style.display = on ? '' : 'none';
       });
     }
+    // 배지
     function addBadge(text){
       const b=document.createElement('div');
       b.textContent=text;
@@ -293,27 +208,27 @@
 
     // 기본 VIEW
     setTextEditable(false);
-    setAdminUI(false);
+    setEditUI(false);
 
     if (isLocalHost || isFile) {
-      // ADMIN: 모든 편집 허용(사진/관리 폼 표시)
+      // ADMIN: 모든 편집 가능(텍스트 + 사진 변경/제거 + 초기화 버튼)
       setTextEditable(true);
-      setAdminUI(true);
+      setEditUI(true);
       addBadge('✎ ADMIN MODE (이 브라우저에서만 저장)');
-      renderAdmin();
     } else if (editFlag) {
-      // EDIT: 공개에서 텍스트만 임시 편집 (버튼/관리 폼 숨김)
+      // EDIT: 공개 페이지에서 텍스트 + 사진 편집 가능(요청 반영)
       setTextEditable(true);
-      setAdminUI(false);
-      addBadge('✎ EDIT MODE (텍스트만 편집)');
+      setEditUI(true);  // 사진 변경/제거 버튼도 표시
+      addBadge('✎ EDIT MODE (임시 편집)');
     } else {
       // VIEW: 공개 읽기 전용
       setTextEditable(false);
-      setAdminUI(false);
+      setEditUI(false);
     }
-
-    renderPublic(); // 모든 모드에서 공개 목록 렌더
   })();
+
+  // year
+  document.getElementById('year').textContent=new Date().getFullYear();
 </script>
 </body>
 </html>
