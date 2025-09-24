@@ -36,26 +36,26 @@
     footer{ border-top:1px solid var(--border); margin-top:24px; color:var(--muted) }
     .foot{ max-width:960px; margin:0 auto; padding:16px }
     .badge{ position:fixed; right:12px; bottom:12px; background:#10b981; color:#fff; padding:6px 10px; border-radius:8px; font-size:12px; z-index:9999; box-shadow:0 2px 6px rgba(0,0,0,.2)}
-    .admin-only{ display:none } /* VIEW 모드에서 숨김. EDIT/ADMIN에서만 표시 */
-/* EDIT/ADMIN 모드일 때 admin-only 강제 노출 */
-:root.edit .admin-only,
-:root.admin .admin-only { display: inline-block !important; }
+    .admin-only{ display:none } /* 기본은 숨김 */
+    /* ✅ EDIT/ADMIN 모드일 때 admin-only 강제 노출 */
+    :root.edit .admin-only,
+    :root.admin .admin-only { display: inline-block !important; }
   </style>
-<script>
-/* URL 파라미터/호스트를 보고 즉시 <html>에 모드 클래스를 부여 */
-(function(){
-  try{
-    var u = new URL(window.location.href);
-    if (u.searchParams.get('edit') === '1' || location.hash.includes('edit')) {
-      document.documentElement.classList.add('edit');   // EDIT 모드
-    }
-    if (location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/i.test(location.hostname)) {
-      document.documentElement.classList.add('admin');  // ADMIN 모드
-    }
-  }catch(e){}
-})();
-</script>
 
+  <!-- ✅ 아주 이른 시점에 모드 태깅: ?edit=1 또는 로컬/localhost면 <html>에 클래스 부여 -->
+  <script>
+    (function(){
+      try{
+        var u = new URL(window.location.href);
+        if (u.searchParams.get('edit') === '1' || location.hash.includes('edit')) {
+          document.documentElement.classList.add('edit');   // EDIT 모드
+        }
+        if (location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/i.test(location.hostname)) {
+          document.documentElement.classList.add('admin');  // ADMIN 모드
+        }
+      }catch(e){}
+    })();
+  </script>
 </head>
 <body>
   <header>
@@ -89,9 +89,10 @@
           <!-- 모두에게 동일한 기본 사진을 쓰려면 src="professor.jpg"로 교체 -->
           <img id="profPhoto" class="avatar" alt="교수 사진" src="">
           <input id="photoFile" type="file" accept="image/*" hidden>
-          <!-- 사진 편집: EDIT/ADMIN 모드에서 표시 -->
+          <!-- ✅ EDIT/ADMIN 모드에서 노출됨 -->
           <button id="changePhoto" class="btn admin-only">사진 변경</button>
           <button id="removePhoto" class="btn admin-only">사진 제거</button>
+          <div class="muted" style="font-size:12px">권장: 정사각형 JPG/PNG</div>
         </div>
         <div>
           <div class="row">
@@ -121,7 +122,7 @@
       </p>
     </section>
 
-    <!-- 강의자료: 5개 과목 개별 다운로드 링크 -->
+    <!-- ✅ 강의자료: 5개 과목 개별 '직접 다운로드' 링크 -->
     <section id="teaching">
       <h2>강의자료</h2>
       <ul>
@@ -140,9 +141,9 @@
   </footer>
 
 <script>
-  // ====== 배포 캐시 초기화용 스키마 ======
+  // ===== 배포 캐시 초기화용 스키마(버전 올리면 로컬 편집값 초기화) =====
   (function schemaReset(){
-    const SCHEMA='lab.schema.v11';
+    const SCHEMA='lab.schema.v12';
     try{
       const storage = window.localStorage;
       if(storage.getItem('lab.__schema_version')!==SCHEMA){
@@ -152,10 +153,10 @@
     }catch(e){}
   })();
 
-  // ====== 안전한 storage 핸들 ======
+  // ===== 안전한 storage 핸들 =====
   const storage = (()=>{ try{ const t='__t'; localStorage.setItem(t,'1'); localStorage.removeItem(t); return localStorage; }catch(e){ return {getItem:()=>null,setItem:()=>{},removeItem:()=>{}} } })();
 
-  // ====== 테마 ======
+  // ===== 테마 =====
   const rootEl=document.documentElement;
   const savedTheme=storage.getItem('lab.theme');
   if(savedTheme==='dark') rootEl.classList.add('dark');
@@ -164,7 +165,7 @@
     storage.setItem('lab.theme', rootEl.classList.contains('dark')?'dark':'light');
   });
 
-  // ====== 텍스트 자동 저장 ======
+  // ===== 텍스트 자동 저장 =====
   function autoPersist(el,key){
     const v=storage.getItem(key); if(v!==null) el.textContent=v;
     let t; const save=()=>storage.setItem(key, el.textContent.trim());
@@ -176,11 +177,11 @@
    ['lab.prof.degB','degB'],['lab.prof.degM','degM'],['lab.prof.degP','degP'],['lab.prof.postdoc','degPostdoc']]
    .forEach(([k,id])=>{ const el=document.getElementById(id); if(el) autoPersist(el,k); });
 
-  // ====== 푸터 이름 동기화 ======
+  // ===== 푸터 이름 동기화 =====
   function syncFooter(){ const name=(storage.getItem('lab.name')||'□□□ 연구실').replace(/<[^>]*>/g,''); document.getElementById('footerLab').textContent=name; }
   window.addEventListener('storage',syncFooter); syncFooter();
 
-  // ====== 사진(브라우저 저장) ======
+  // ===== 사진(브라우저 저장) =====
   const profPhoto=document.getElementById('profPhoto'); const photoKey='lab.prof.photo';
   const savedPhoto=storage.getItem(photoKey); if(savedPhoto) profPhoto.src=savedPhoto;
   const changeBtn=document.getElementById('changePhoto'), removeBtn=document.getElementById('removePhoto');
@@ -192,60 +193,34 @@
   });
   if(removeBtn) removeBtn.addEventListener('click',()=>{ storage.removeItem(photoKey); profPhoto.src=''; });
 
-  // ====== 모드 제어: VIEW / EDIT(?edit=1) / ADMIN(file://, localhost) ======
-  (function gateModes(){
-    const isLocalHost = /^(localhost|127\.0\.0\.1)$/i.test(location.hostname);
-    const isFile      = location.protocol === 'file:';
-    const url         = new URL(location.href);
-    const editFlag    = url.searchParams.has('edit') || location.hash.includes('edit');
-
-    function setTextEditable(on){
-      document.querySelectorAll('.editable').forEach(el=>{
-        if(on) el.setAttribute('contenteditable','true'); else el.removeAttribute('contenteditable');
-      });
-    }
-    function setEditUI(on){
-      document.querySelectorAll('.admin-only').forEach(el=>{ el.style.display = on ? '' : 'none'; });
-    }
-    function badge(t){
-      const b=document.createElement('div'); b.textContent=t;
-      Object.assign(b.style,{position:'fixed',right:'12px',bottom:'12px',padding:'6px 10px',background:'#10b981',color:'#fff',borderRadius:'8px',fontSize:'12px',zIndex:9999,boxShadow:'0 2px 6px rgba(0,0,0,.2)'});
+  // ===== DOMContentLoaded 시점에 contenteditable 보장 (EDIT/ADMIN) =====
+  document.addEventListener('DOMContentLoaded', function(){
+    var isEdit  = document.documentElement.classList.contains('edit');
+    var isAdmin = document.documentElement.classList.contains('admin');
+    document.querySelectorAll('.editable').forEach(function(el){
+      if (isEdit || isAdmin) el.setAttribute('contenteditable','true');
+      else el.removeAttribute('contenteditable');
+    });
+    // 배지
+    var badgeText = isAdmin ? '✎ ADMIN MODE' : (isEdit ? '✎ EDIT MODE' : '');
+    if (badgeText){
+      var b=document.createElement('div'); b.textContent=badgeText;
+      Object.assign(b.style,{position:'fixed',right:'12px',bottom:'12px',padding:'6px 10px',
+        background:'#10b981',color:'#fff',borderRadius:'8px',fontSize:'12px',zIndex:9999,boxShadow:'0 2px 6px rgba(0,0,0,.2)'});
       document.body.appendChild(b);
     }
+  });
 
-    // 기본 VIEW
-    setTextEditable(false); setEditUI(false);
-
-    if (isLocalHost || isFile) {          // ADMIN: 로컬/localhost
-      setTextEditable(true); setEditUI(true); badge('✎ ADMIN MODE');
-    } else if (editFlag) {                // EDIT: 공개 + ?edit=1
-      setTextEditable(true); setEditUI(true); badge('✎ EDIT MODE');
-    } else {                              // VIEW: 공개
-      setTextEditable(false); setEditUI(false);
-    }
-  })();
-
-  // ====== 연도 ======
+  // ===== 연도 =====
   document.getElementById('year').textContent=new Date().getFullYear();
 
-  // ====== 초기화 버튼 ======
+  // ===== 초기화 버튼 =====
   const resetBtn=document.getElementById('resetAll');
   if(resetBtn) resetBtn.addEventListener('click',()=>{
     if(!confirm('모든 저장된 편집 내용을 초기화할까요?')) return;
     Object.keys(localStorage||{}).filter(k=>k.startsWith('lab.')).forEach(k=>localStorage.removeItem(k));
     location.reload();
   });
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-  var isEdit  = document.documentElement.classList.contains('edit');
-  var isAdmin = document.documentElement.classList.contains('admin');
-
-  document.querySelectorAll('.editable').forEach(function(el){
-    if (isEdit || isAdmin) el.setAttribute('contenteditable','true');
-    else el.removeAttribute('contenteditable');
-  });
-});
 </script>
 </body>
 </html>
