@@ -36,7 +36,7 @@
     footer{ border-top:1px solid var(--border); margin-top:24px; color:var(--muted) }
     .foot{ max-width:960px; margin:0 auto; padding:16px }
     .badge{ position:fixed; right:12px; bottom:12px; background:#10b981; color:#fff; padding:6px 10px; border-radius:8px; font-size:12px; z-index:9999; box-shadow:0 2px 6px rgba(0,0,0,.2)}
-    .admin-only{ display:none } /* VIEW 모드에서 숨김. EDIT/ADMIN에서 필요 시 표시 */
+    .admin-only{ display:none } /* VIEW 모드에서 숨김. EDIT/ADMIN에서만 표시 */
   </style>
 </head>
 <body>
@@ -68,6 +68,7 @@
       <h2>교수 소개</h2>
       <div class="card" style="display:grid; grid-template-columns:140px 1fr; gap:16px">
         <div style="display:grid; gap:10px; justify-items:center">
+          <!-- 기본은 비어 있음. 모두에게 보이는 고정 사진을 원하면 src="professor.jpg"로 교체 -->
           <img id="profPhoto" class="avatar" alt="교수 사진" src="">
           <input id="photoFile" type="file" accept="image/*" hidden>
           <!-- 사진 편집: EDIT/ADMIN 모드에서 표시 -->
@@ -108,10 +109,9 @@
       <h2>강의자료</h2>
       <p class="sub">
         <a id="driveLink" href="https://drive.google.com/drive/folders/18Y-_ALYRli2JYrDk8Q3bt3M4UiuGaB46" target="_blank" rel="noopener">
-          여기 클릭
+          강의자료 (여기 클릭)
         </a>
       </p>
-      <p class="muted" style="font-size:12px">* 구글 드라이브에서 이 폴더만 공개(Viewer)로 설정하세요. 상위/다른 폴더는 공유하지 마세요.</p>
     </section>
   </main>
 
@@ -125,7 +125,7 @@
 
   // ===== Schema reset (bump to clear old edits) =====
   (function schemaReset(){
-    const SCHEMA='lab.schema.v8';   // 새 배포 시 숫자 올리면 이전 저장값 자동 초기화
+    const SCHEMA='lab.schema.v9';   // 새 배포 시 숫자 올리면 이전 저장값 자동 초기화
     const KEY='lab.__schema_version';
     try{
       const cur=storage.getItem(KEY);
@@ -216,9 +216,9 @@
       setEditUI(true);
       addBadge('✎ ADMIN MODE (이 브라우저에서만 저장)');
     } else if (editFlag) {
-      // EDIT: 공개 페이지에서 텍스트 + 사진 편집 가능(요청 반영)
+      // EDIT: 공개 페이지에서 텍스트 + 사진 편집 가능
       setTextEditable(true);
-      setEditUI(true);  // 사진 변경/제거 버튼도 표시
+      setEditUI(true);
       addBadge('✎ EDIT MODE (임시 편집)');
     } else {
       // VIEW: 공개 읽기 전용
