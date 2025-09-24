@@ -68,7 +68,7 @@
       <h2>교수 소개</h2>
       <div class="card" style="display:grid; grid-template-columns:140px 1fr; gap:16px">
         <div style="display:grid; gap:10px; justify-items:center">
-          <!-- 기본은 비어 있음. 모두에게 보이는 고정 사진을 원하면 src="professor.jpg"로 교체 -->
+          <!-- 모두에게 동일한 기본 사진을 쓰려면 src="professor.jpg"로 교체 -->
           <img id="profPhoto" class="avatar" alt="교수 사진" src="">
           <input id="photoFile" type="file" accept="image/*" hidden>
           <!-- 사진 편집: EDIT/ADMIN 모드에서 표시 -->
@@ -104,14 +104,17 @@
       </p>
     </section>
 
-    <!-- 강의자료: 단일 링크로 단순화 -->
+    <!-- 강의자료: 5개 과목 개별 다운로드 링크 -->
     <section id="teaching">
       <h2>강의자료</h2>
-      <p class="sub">
-        <a id="driveLink" href="https://drive.google.com/drive/folders/18Y-_ALYRli2JYrDk8Q3bt3M4UiuGaB46" target="_blank" rel="noopener">
-          강의자료 (여기 클릭)
-        </a>
-      </p>
+      <ul>
+        <li><a href="https://drive.google.com/uc?export=download&id=1OY3pt9m70jjjZ7EduVY-gNYqIEBrWiHK" target="_blank" rel="noopener">📥 역학</a></li>
+        <li><a href="https://drive.google.com/uc?export=download&id=1G4GcZJ-rIGJC0PKcbp40feT-nomJH2ys" target="_blank" rel="noopener">📥 양자역학</a></li>
+        <li><a href="https://drive.google.com/uc?export=download&id=13jl0tzRL0mGhxsjz3B-pcdrNnGPOfFwn" target="_blank" rel="noopener">📥 전자기학</a></li>
+        <li><a href="https://drive.google.com/uc?export=download&id=1tyRCPN4GCjeoWjIdrCiyaPB9SSvWxJmd" target="_blank" rel="noopener">📥 통계물리학</a></li>
+        <li><a href="https://drive.google.com/uc?export=download&id=1E52i8zGZpRFIFNu0sJ6AJub2Dwunk0Ou" target="_blank" rel="noopener">📥 수리물리학</a></li>
+      </ul>
+      <p class="muted" style="font-size:12px">* 각 링크는 바로 파일을 내려받는 형식(Drive UI 미노출)입니다.</p>
     </section>
   </main>
 
@@ -120,24 +123,22 @@
   </footer>
 
 <script>
-  // ===== Safe storage =====
-  const storage = (()=>{ try{ const t='__t'; localStorage.setItem(t,'1'); localStorage.removeItem(t); return localStorage; }catch(e){ return {getItem:()=>null,setItem:()=>{},removeItem:()=>{}} } })();
-
-  // ===== Schema reset (bump to clear old edits) =====
+  // ====== 배포 캐시 초기화용 스키마 ======
   (function schemaReset(){
-    const SCHEMA='lab.schema.v9';   // 새 배포 시 숫자 올리면 이전 저장값 자동 초기화
-    const KEY='lab.__schema_version';
+    const SCHEMA='lab.schema.v11';
     try{
-      const cur=storage.getItem(KEY);
-      if(cur!==SCHEMA){
-        Object.keys(localStorage||{}).filter(k=>k.startsWith('lab.')).forEach(k=>storage.removeItem(k));
-        storage.setItem(KEY,SCHEMA);
-        console.log('[lab] storage reset ->',SCHEMA);
+      const storage = window.localStorage;
+      if(storage.getItem('lab.__schema_version')!==SCHEMA){
+        Object.keys(storage).filter(k=>k.startsWith('lab.')).forEach(k=>storage.removeItem(k));
+        storage.setItem('lab.__schema_version', SCHEMA);
       }
     }catch(e){}
   })();
 
-  // ===== Theme =====
+  // ====== 안전한 storage 핸들 ======
+  const storage = (()=>{ try{ const t='__t'; localStorage.setItem(t,'1'); localStorage.removeItem(t); return localStorage; }catch(e){ return {getItem:()=>null,setItem:()=>{},removeItem:()=>{}} } })();
+
+  // ====== 테마 ======
   const rootEl=document.documentElement;
   const savedTheme=storage.getItem('lab.theme');
   if(savedTheme==='dark') rootEl.classList.add('dark');
@@ -146,7 +147,7 @@
     storage.setItem('lab.theme', rootEl.classList.contains('dark')?'dark':'light');
   });
 
-  // ===== Auto-persist text =====
+  // ====== 텍스트 자동 저장 ======
   function autoPersist(el,key){
     const v=storage.getItem(key); if(v!==null) el.textContent=v;
     let t; const save=()=>storage.setItem(key, el.textContent.trim());
@@ -158,11 +159,11 @@
    ['lab.prof.degB','degB'],['lab.prof.degM','degM'],['lab.prof.degP','degP'],['lab.prof.postdoc','degPostdoc']]
    .forEach(([k,id])=>{ const el=document.getElementById(id); if(el) autoPersist(el,k); });
 
-  // footer sync
+  // ====== 푸터 이름 동기화 ======
   function syncFooter(){ const name=(storage.getItem('lab.name')||'□□□ 연구실').replace(/<[^>]*>/g,''); document.getElementById('footerLab').textContent=name; }
   window.addEventListener('storage',syncFooter); syncFooter();
 
-  // ===== Photo (dataURL) =====
+  // ====== 사진(브라우저 저장) ======
   const profPhoto=document.getElementById('profPhoto'); const photoKey='lab.prof.photo';
   const savedPhoto=storage.getItem(photoKey); if(savedPhoto) profPhoto.src=savedPhoto;
   const changeBtn=document.getElementById('changePhoto'), removeBtn=document.getElementById('removePhoto');
@@ -174,61 +175,49 @@
   });
   if(removeBtn) removeBtn.addEventListener('click',()=>{ storage.removeItem(photoKey); profPhoto.src=''; });
 
-  // ===== Mode gating: VIEW / EDIT (?edit=1) / ADMIN (file://, localhost) =====
+  // ====== 모드 제어: VIEW / EDIT(?edit=1) / ADMIN(file://, localhost) ======
   (function gateModes(){
     const isLocalHost = /^(localhost|127\.0\.0\.1)$/i.test(location.hostname);
     const isFile      = location.protocol === 'file:';
     const url         = new URL(location.href);
     const editFlag    = url.searchParams.has('edit') || location.hash.includes('edit');
 
-    // TEXT 편집 on/off
     function setTextEditable(on){
       document.querySelectorAll('.editable').forEach(el=>{
-        if(on) el.setAttribute('contenteditable','true');
-        else   el.removeAttribute('contenteditable');
+        if(on) el.setAttribute('contenteditable','true'); else el.removeAttribute('contenteditable');
       });
     }
-    // 사진 버튼/초기화 버튼 표시 on/off
     function setEditUI(on){
-      document.querySelectorAll('.admin-only').forEach(el=>{
-        el.style.display = on ? '' : 'none';
-      });
+      document.querySelectorAll('.admin-only').forEach(el=>{ el.style.display = on ? '' : 'none'; });
     }
-    // 배지
-    function addBadge(text){
-      const b=document.createElement('div');
-      b.textContent=text;
-      Object.assign(b.style,{
-        position:'fixed', right:'12px', bottom:'12px', padding:'6px 10px',
-        background:'#10b981', color:'#fff', borderRadius:'8px',
-        fontSize:'12px', zIndex:9999, boxShadow:'0 2px 6px rgba(0,0,0,.2)'
-      });
+    function badge(t){
+      const b=document.createElement('div'); b.textContent=t;
+      Object.assign(b.style,{position:'fixed',right:'12px',bottom:'12px',padding:'6px 10px',background:'#10b981',color:'#fff',borderRadius:'8px',fontSize:'12px',zIndex:9999,boxShadow:'0 2px 6px rgba(0,0,0,.2)'});
       document.body.appendChild(b);
     }
 
     // 기본 VIEW
-    setTextEditable(false);
-    setEditUI(false);
+    setTextEditable(false); setEditUI(false);
 
-    if (isLocalHost || isFile) {
-      // ADMIN: 모든 편집 가능(텍스트 + 사진 변경/제거 + 초기화 버튼)
-      setTextEditable(true);
-      setEditUI(true);
-      addBadge('✎ ADMIN MODE (이 브라우저에서만 저장)');
-    } else if (editFlag) {
-      // EDIT: 공개 페이지에서 텍스트 + 사진 편집 가능
-      setTextEditable(true);
-      setEditUI(true);
-      addBadge('✎ EDIT MODE (임시 편집)');
-    } else {
-      // VIEW: 공개 읽기 전용
-      setTextEditable(false);
-      setEditUI(false);
+    if (isLocalHost || isFile) {          // ADMIN: 로컬/localhost
+      setTextEditable(true); setEditUI(true); badge('✎ ADMIN MODE');
+    } else if (editFlag) {                // EDIT: 공개 + ?edit=1
+      setTextEditable(true); setEditUI(true); badge('✎ EDIT MODE');
+    } else {                              // VIEW: 공개
+      setTextEditable(false); setEditUI(false);
     }
   })();
 
-  // year
+  // ====== 연도 ======
   document.getElementById('year').textContent=new Date().getFullYear();
+
+  // ====== 초기화 버튼 ======
+  const resetBtn=document.getElementById('resetAll');
+  if(resetBtn) resetBtn.addEventListener('click',()=>{
+    if(!confirm('모든 저장된 편집 내용을 초기화할까요?')) return;
+    Object.keys(localStorage||{}).filter(k=>k.startsWith('lab.')).forEach(k=>localStorage.removeItem(k));
+    location.reload();
+  });
 </script>
 </body>
 </html>
